@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Mesan Safety Link" },
+      { name: "description", content: "Mesan Safety Link is a safety app for Maesan-dong residents, providing real-time safety information and emergency assistance." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Mesan Safety Link" },
+      { property: "og:description", content: "Mesan Safety Link is a safety app for Maesan-dong residents, providing real-time safety information and emergency assistance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Mesan Safety Link" },
+      { name: "twitter:description", content: "Mesan Safety Link is a safety app for Maesan-dong residents, providing real-time safety information and emergency assistance." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d7a04714-d65b-4394-bfa7-9bb4afcd8910/id-preview-b4043b83--e3b2a8e6-cf5e-4bfd-a2ee-5dd91723e56f.lovable.app-1780561445998.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d7a04714-d65b-4394-bfa7-9bb4afcd8910/id-preview-b4043b83--e3b2a8e6-cf5e-4bfd-a2ee-5dd91723e56f.lovable.app-1780561445998.png" },
     ],
     links: [
       {
