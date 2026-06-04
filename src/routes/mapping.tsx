@@ -102,6 +102,16 @@ function MappingPage() {
                     </span>
                   </div>
                 </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    toast.success("매핑 완료! 지도에 반영되었습니다.")
+                  }
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-sm active:scale-[0.99]"
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                  현장 방문 후 매핑 완료
+                </button>
               </li>
             ))}
           </ul>
