@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Camera, MapPin } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/report")({
   head: () => ({ meta: [{ title: "원터치 주민 제보 — 매산동 안심-링크" }] }),
@@ -15,6 +25,22 @@ const items = [
 ];
 
 function ReportPage() {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+
+  const handleSelect = (label: string) => {
+    setSelected(label);
+    toast.success("제보가 접수되었습니다.", {
+      description: `${label} · 지도에 반영됩니다.`,
+    });
+  };
+
+  const handleLocation = () => {
+    toast.success("제보가 완료되었습니다.", {
+      description: "현재 위치: 수원시 팔달구 매산로 12-3",
+    });
+  };
+
   return (
     <AppShell>
       <section className="px-4 pt-4">
@@ -26,32 +52,73 @@ function ReportPage() {
       </section>
 
       <section className="grid grid-cols-2 gap-3 px-4 pt-4">
-        {items.map((it) => (
-          <button
-            key={it.label}
-            type="button"
-            className="flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl border-2 border-border bg-card p-4 text-center shadow-sm transition active:scale-[0.98] active:border-primary active:bg-secondary"
-          >
-            <span className="text-5xl">{it.emoji}</span>
-            <span className="text-lg font-bold leading-tight">{it.label}</span>
-          </button>
-        ))}
+        {items.map((it) => {
+          const active = selected === it.label;
+          return (
+            <button
+              key={it.label}
+              type="button"
+              onClick={() => handleSelect(it.label)}
+              className={`flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl border-2 p-4 text-center shadow-sm transition active:scale-[0.98] ${
+                active
+                  ? "border-primary border-[3px] bg-primary/10 ring-4 ring-primary/20"
+                  : "border-border bg-card"
+              }`}
+            >
+              <span className="text-5xl">{it.emoji}</span>
+              <span className="text-lg font-bold leading-tight">{it.label}</span>
+              {active && (
+                <span className="text-xs font-bold text-primary">✓ 선택됨</span>
+              )}
+            </button>
+          );
+        })}
       </section>
 
       <section className="space-y-3 px-4 pt-5">
         <button
           type="button"
+          onClick={() => setCameraOpen(true)}
           className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-border bg-card px-6 py-5 text-lg font-bold active:scale-[0.99]"
         >
           <Camera className="h-6 w-6" /> 사진 촬영
         </button>
         <button
           type="button"
+          onClick={handleLocation}
           className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-5 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.99]"
         >
           <MapPin className="h-6 w-6" /> 현재 위치로 제보하기
         </button>
       </section>
+
+      <Dialog open={cameraOpen} onOpenChange={setCameraOpen}>
+        <DialogContent className="max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">📷 카메라 권한이 필요합니다</DialogTitle>
+            <DialogDescription className="pt-2 text-base">
+              제보 현장의 사진을 촬영하려면 카메라 접근 권한을 허용해 주세요.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <button
+              onClick={() => setCameraOpen(false)}
+              className="flex-1 rounded-xl border-2 border-border bg-card px-5 py-3 text-base font-bold"
+            >
+              취소
+            </button>
+            <button
+              onClick={() => {
+                setCameraOpen(false);
+                toast.success("카메라 권한이 허용되었습니다.");
+              }}
+              className="flex-1 rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
+            >
+              허용
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
