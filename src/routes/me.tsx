@@ -25,13 +25,25 @@ function MePage() {
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [draft, setDraft] = useState(emergency);
+  const [name, setName] = useState("김안심");
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameDraft, setNameDraft] = useState(name);
 
   return (
     <AppShell>
       <section className="px-4 pt-4">
         <div className="rounded-3xl bg-primary/10 p-5">
           <div className="text-sm font-bold text-primary">매산동 주민</div>
-          <h1 className="mt-1 text-2xl font-bold">안녕하세요, 김안심 님</h1>
+          <button
+            type="button"
+            onClick={() => {
+              setNameDraft(name);
+              setNameOpen(true);
+            }}
+            className="mt-1 inline-flex items-center gap-2 text-left text-2xl font-bold active:opacity-70"
+          >
+            안녕하세요, <span className="underline decoration-primary decoration-2 underline-offset-4">{name}</span> 님
+          </button>
           <p className="mt-1 text-sm text-muted-foreground">
             지금까지 안심 활동 12회 · 제보 3건
           </p>
@@ -162,11 +174,20 @@ function MePage() {
               </div>
             </li>
             <li className="flex gap-3 rounded-xl bg-destructive/10 p-3">
-              <span className="text-2xl">🚨</span>
+              <span className="text-2xl">🆘</span>
               <div>
-                <div className="font-bold text-destructive">SOS 긴급 버튼</div>
+                <div className="font-bold text-destructive">SOS 탭</div>
                 <div className="text-sm text-muted-foreground">
-                  하단 SOS 탭을 누르면 매산동 파출소와 자생방범대에 즉시 알림이 전송됩니다.
+                  매산동 파출소와 자생방범대에 즉시 긴급 경보를 발송합니다.
+                </div>
+              </div>
+            </li>
+            <li className="flex gap-3 rounded-xl bg-[color:var(--senior)]/10 p-3">
+              <span className="text-2xl">👥</span>
+              <div>
+                <div className="font-bold text-[color:var(--senior)]">매핑 탭</div>
+                <div className="text-sm text-muted-foreground">
+                  세대 공존 대리 제보 — 어르신과 청년 봉사단이 함께 만드는 안전 마을.
                 </div>
               </div>
             </li>
@@ -177,6 +198,44 @@ function MePage() {
               className="w-full rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
             >
               확인
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 닉네임 수정 */}
+      <Dialog open={nameOpen} onOpenChange={setNameOpen}>
+        <DialogContent className="max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">닉네임 수정</DialogTitle>
+            <DialogDescription className="text-base">
+              지도와 제보에 표시될 닉네임을 입력해 주세요.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            placeholder="닉네임"
+            className="text-lg"
+          />
+          <DialogFooter className="gap-2">
+            <button
+              onClick={() => setNameOpen(false)}
+              className="flex-1 rounded-xl border-2 border-border bg-card px-5 py-3 text-base font-bold"
+            >
+              취소
+            </button>
+            <button
+              onClick={() => {
+                const v = nameDraft.trim();
+                if (!v) return;
+                setName(v);
+                setNameOpen(false);
+                toast.success("닉네임이 저장되었습니다.");
+              }}
+              className="flex-1 rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
+            >
+              저장
             </button>
           </DialogFooter>
         </DialogContent>

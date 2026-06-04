@@ -1,70 +1,128 @@
-import { ShieldCheck, AlertTriangle } from "lucide-react";
+import { ShieldCheck, AlertTriangle, X } from "lucide-react";
+import { useState } from "react";
 
-// 매산동 중심 좌표
 const CENTER = { lat: 37.2788, lng: 127.0163 };
 
-// 핀: 중심 기준 작은 오프셋(도 단위). 위/아래/좌/우 분산
-type Pin = { kind: "safe" | "danger"; label: string; dLat: number; dLng: number };
+type Pin = {
+  kind: "safe" | "danger";
+  id: string;
+  title: string;
+  body: string;
+  // 화면상 고정 위치 (%)
+  left: number;
+  top: number;
+};
+
 const pins: Pin[] = [
-  { kind: "safe", label: "셉테드 안심 폴 · 매산로 입구", dLat: 0.0012, dLng: -0.0009 },
-  { kind: "safe", label: "셉테드 안심 폴 · 매산초교 앞", dLat: -0.0008, dLng: 0.0014 },
-  { kind: "safe", label: "셉테드 안심 폴 · 매산시장", dLat: 0.0005, dLng: 0.0018 },
-  { kind: "safe", label: "셉테드 안심 폴 · 매산공원", dLat: -0.0015, dLng: -0.0006 },
-  { kind: "danger", label: "위험 제보 · 가로등 고장", dLat: 0.0007, dLng: 0.0006 },
-  { kind: "danger", label: "위험 제보 · 거동 수상자", dLat: -0.001, dLng: -0.0014 },
+  {
+    kind: "safe",
+    id: "s1",
+    title: "셉테드 안심 폴 #1",
+    body: "매산로 12번길\nLED 안심등 · 음악 · 향기 작동 중 ✅",
+    left: 28,
+    top: 32,
+  },
+  {
+    kind: "safe",
+    id: "s2",
+    title: "셉테드 안심 폴 #2",
+    body: "매산로 5번길\nLED 안심등 · 음악 · 향기 작동 중 ✅",
+    left: 62,
+    top: 44,
+  },
+  {
+    kind: "safe",
+    id: "s3",
+    title: "셉테드 안심 폴 #3",
+    body: "팔달문 근처\nLED 안심등 · 음악 · 향기 작동 중 ✅",
+    left: 74,
+    top: 70,
+  },
+  {
+    kind: "danger",
+    id: "d1",
+    title: "위험 제보: 가로등 고장",
+    body: "매산로 어두운 골목\n신고 시간: 21:30 · 처리 중",
+    left: 38,
+    top: 58,
+  },
+  {
+    kind: "danger",
+    id: "d2",
+    title: "위험 제보: 거동 수상자",
+    body: "매산시장 뒷골목\n신고 시간: 20:45 · 처리 중",
+    left: 52,
+    top: 22,
+  },
 ];
 
-// Google Maps Embed (API 키 없이 동작하는 q= 방식)
 const mapSrc = `https://www.google.com/maps?q=${CENTER.lat},${CENTER.lng}&z=16&hl=ko&output=embed`;
 
-// 좌표 오프셋 → 픽셀 위치 (대략적 시각화 오버레이)
-// 1도 ≈ 100km, 줌16 기준 컨테이너에서 사용할 스케일
-function toPercent(d: number, range: number) {
-  // d: -range..+range → 0..100%
-  return 50 + (d / range) * 50;
-}
-
-export function MapView() {
-  const range = 0.0025; // 컨테이너에 비춰질 좌표 범위
+export function MapView({ showRoute = false }: { showRoute?: boolean }) {
+  const [active, setActive] = useState<Pin | null>(null);
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl border border-border bg-secondary shadow-sm">
-      {/* 실제 구글맵 */}
+      {/* 구글맵 — pointer-events-none 으로 완전히 고정 (드래그/줌 차단) */}
       <iframe
         title="매산동 실시간 안심 지도"
         src={mapSrc}
         loading="lazy"
-        className="absolute inset-0 h-full w-full border-0"
+        className="pointer-events-none absolute inset-0 h-full w-full border-0 select-none"
         referrerPolicy="no-referrer-when-downgrade"
-        allowFullScreen
+        tabIndex={-1}
       />
 
-      {/* 핀 오버레이 (지도 인터랙션 방해하지 않도록 pointer-events-none) */}
-      <div className="pointer-events-none absolute inset-0">
-        {pins.map((p, i) => {
-          const left = toPercent(p.dLng, range);
-          const top = toPercent(-p.dLat, range); // 위도는 위로 갈수록 +
+      {/* 경로 (민트 점선) */}
+      {showRoute && (
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <polyline
+            points="28,32 38,58 52,22 62,44 74,70"
+            fill="none"
+            stroke="#00B48A"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="2 1.5"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      )}
+
+      {/* 핀 (지도 위 고정 — 화면 % 기준이므로 같이 움직이지 않음) */}
+      <div className="absolute inset-0">
+        {pins.map((p) => {
           const isSafe = p.kind === "safe";
           return (
-            <div
-              key={i}
-              className="absolute -translate-x-1/2 -translate-y-full"
-              style={{ left: `${left}%`, top: `${top}%` }}
-              title={p.label}
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setActive(p)}
+              className="absolute -translate-x-1/2 -translate-y-full focus:outline-none"
+              style={{ left: `${p.left}%`, top: `${p.top}%` }}
+              aria-label={p.title}
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow-lg ${
+                className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-white shadow-lg transition-transform active:scale-95 ${
                   isSafe ? "bg-primary text-white" : "bg-destructive text-white"
                 }`}
               >
                 {isSafe ? (
-                  <ShieldCheck className="h-4 w-4" />
+                  <ShieldCheck className="h-4.5 w-4.5" />
                 ) : (
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className="h-4.5 w-4.5" />
                 )}
               </div>
-              <div className="mx-auto h-2 w-2 -translate-y-1 rotate-45 border-b-2 border-r-2 border-white bg-inherit" />
-            </div>
+              <div
+                className={`mx-auto h-2 w-2 -translate-y-1 rotate-45 border-b-2 border-r-2 border-white ${
+                  isSafe ? "bg-primary" : "bg-destructive"
+                }`}
+              />
+            </button>
           );
         })}
       </div>
@@ -85,10 +143,57 @@ export function MapView() {
         </div>
       </div>
 
+      {/* 경로 안내 배너 */}
+      {showRoute && (
+        <div className="absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg">
+          매산동 안심 동행길 경로 안내 중 · 예상 소요 8분
+        </div>
+      )}
+
       {/* 위치 라벨 */}
       <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-background/95 px-3 py-1.5 text-xs font-bold shadow-md">
         📍 수원시 팔달구 매산동
       </div>
+
+      {/* 핀 클릭 팝업 */}
+      {active && (
+        <div className="absolute inset-0 z-10 flex items-end justify-center bg-black/30 p-4 animate-fade-in">
+          <div className="w-full max-w-[360px] rounded-2xl border-2 border-border bg-background p-4 shadow-xl">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-white ${
+                    active.kind === "safe" ? "bg-primary" : "bg-destructive"
+                  }`}
+                >
+                  {active.kind === "safe" ? (
+                    <ShieldCheck className="h-4 w-4" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4" />
+                  )}
+                </span>
+                <div className="text-base font-bold">{active.title}</div>
+              </div>
+              <button
+                onClick={() => setActive(null)}
+                className="rounded-full p-1 text-muted-foreground hover:bg-secondary"
+                aria-label="닫기"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="mt-3 whitespace-pre-line text-sm text-foreground/80">
+              {active.body}
+            </p>
+            <button
+              onClick={() => setActive(null)}
+              className="mt-4 w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
