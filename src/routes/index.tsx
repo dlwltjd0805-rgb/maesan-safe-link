@@ -77,9 +77,14 @@ function Home() {
           안심 귀가 경로 안내 시작
         </button>
         {routeOn ? (
-          <p className="mt-2 text-center text-sm font-bold text-primary">
-            ● 안심 동행길 경로 안내 중 · 예상 소요 8분
-          </p>
+          <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/10 p-3 text-center">
+            <p className="text-sm font-bold text-primary">
+              ✅ 가장 안전한 경로를 찾았습니다.
+            </p>
+            <p className="mt-1 text-sm font-bold text-primary">
+              셉테드 안심 폴 3개 경유 · 예상 소요 8분
+            </p>
+          </div>
         ) : (
           <p className="mt-2 text-center text-sm text-muted-foreground">
             가장 밝고 안전한 길로 안내합니다
