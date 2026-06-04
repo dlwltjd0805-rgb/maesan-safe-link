@@ -25,6 +25,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [open, setOpen] = useState(false);
+  const [routeOn, setRouteOn] = useState(false);
 
   const startRoute = () => {
     setStatus("loading");
@@ -34,6 +35,7 @@ function Home() {
 
   const closeDialog = () => {
     setOpen(false);
+    if (status === "done") setRouteOn(true);
     setStatus("idle");
   };
 
@@ -48,18 +50,22 @@ function Home() {
 
       <section className="px-4 pt-3">
         <div className="h-[420px]">
-          <MapView />
+          <MapView showRoute={routeOn} />
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 px-4 pt-4">
-        <div className="rounded-2xl border border-border bg-secondary p-4">
-          <div className="text-sm text-muted-foreground">셉테드 안심 폴</div>
-          <div className="mt-1 text-2xl font-bold text-primary">12개소</div>
+      <section className="grid grid-cols-3 gap-2 px-4 pt-4">
+        <div className="rounded-2xl border border-border bg-secondary p-3">
+          <div className="text-xs text-muted-foreground">셉테드 안심 폴</div>
+          <div className="mt-1 text-xl font-bold text-primary">12개소</div>
         </div>
-        <div className="rounded-2xl border border-border bg-destructive/5 p-4">
-          <div className="text-sm text-muted-foreground">오늘의 위험 제보</div>
-          <div className="mt-1 text-2xl font-bold text-destructive">4건</div>
+        <div className="rounded-2xl border border-border bg-destructive/5 p-3">
+          <div className="text-xs text-muted-foreground">오늘의 위험 제보</div>
+          <div className="mt-1 text-xl font-bold text-destructive">4건</div>
+        </div>
+        <div className="rounded-2xl border border-border bg-primary/10 p-3">
+          <div className="text-xs text-muted-foreground">안심 귀가 완료</div>
+          <div className="mt-1 text-xl font-bold text-primary">오늘 23명</div>
         </div>
       </section>
 
@@ -72,9 +78,15 @@ function Home() {
           <Navigation className="h-6 w-6" />
           안심 귀가 경로 안내 시작
         </button>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          가장 밝고 안전한 길로 안내합니다
-        </p>
+        {routeOn ? (
+          <p className="mt-2 text-center text-sm font-bold text-primary">
+            ● 안심 동행길 경로 안내 중 · 예상 소요 8분
+          </p>
+        ) : (
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            가장 밝고 안전한 길로 안내합니다
+          </p>
+        )}
       </section>
 
       <Dialog open={open} onOpenChange={(o) => (!o ? closeDialog() : null)}>

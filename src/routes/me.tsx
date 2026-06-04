@@ -25,13 +25,25 @@ function MePage() {
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [draft, setDraft] = useState(emergency);
+  const [name, setName] = useState("김안심");
+  const [nameOpen, setNameOpen] = useState(false);
+  const [nameDraft, setNameDraft] = useState(name);
 
   return (
     <AppShell>
       <section className="px-4 pt-4">
         <div className="rounded-3xl bg-primary/10 p-5">
           <div className="text-sm font-bold text-primary">매산동 주민</div>
-          <h1 className="mt-1 text-2xl font-bold">안녕하세요, 김안심 님</h1>
+          <button
+            type="button"
+            onClick={() => {
+              setNameDraft(name);
+              setNameOpen(true);
+            }}
+            className="mt-1 inline-flex items-center gap-2 text-left text-2xl font-bold active:opacity-70"
+          >
+            안녕하세요, <span className="underline decoration-primary decoration-2 underline-offset-4">{name}</span> 님
+          </button>
           <p className="mt-1 text-sm text-muted-foreground">
             지금까지 안심 활동 12회 · 제보 3건
           </p>

@@ -29,9 +29,12 @@ function SosPage() {
           <span className="absolute inset-0 animate-ping rounded-full bg-white/40" />
           <Siren className="relative h-7 w-7" />
         </span>
-        <div>
+        <div className="flex-1">
           <div className="text-xl font-bold">긴급 SOS 활성화</div>
-          <div className="text-sm opacity-90">주변에 도움을 요청하고 있습니다…</div>
+          <div className="mt-0.5 flex items-center gap-2 text-sm opacity-95">
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-white" />
+            신호 전송 중…
+          </div>
         </div>
       </div>
 
