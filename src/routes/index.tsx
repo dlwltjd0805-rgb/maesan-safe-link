@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Navigation, Loader2, MapPin, Clock } from "lucide-react";
+import { Navigation } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { MapView } from "@/components/MapView";
@@ -23,20 +23,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [open, setOpen] = useState(false);
   const [routeOn, setRouteOn] = useState(false);
+  const [origin] = useState("현재 위치 (수원시 팔달구 매산로 12-3)");
+  const [destination, setDestination] = useState("");
 
   const startRoute = () => {
-    setStatus("loading");
     setOpen(true);
-    window.setTimeout(() => setStatus("done"), 1500);
   };
 
-  const closeDialog = () => {
+  const confirmRoute = () => {
     setOpen(false);
-    if (status === "done") setRouteOn(true);
-    setStatus("idle");
+    setRouteOn(true);
   };
 
   return (
@@ -79,9 +77,14 @@ function Home() {
           안심 귀가 경로 안내 시작
         </button>
         {routeOn ? (
-          <p className="mt-2 text-center text-sm font-bold text-primary">
-            ● 안심 동행길 경로 안내 중 · 예상 소요 8분
-          </p>
+          <div className="mt-3 rounded-2xl border-2 border-primary bg-primary/10 p-3 text-center">
+            <p className="text-sm font-bold text-primary">
+              ✅ 가장 안전한 경로를 찾았습니다.
+            </p>
+            <p className="mt-1 text-sm font-bold text-primary">
+              셉테드 안심 폴 3개 경유 · 예상 소요 8분
+            </p>
+          </div>
         ) : (
           <p className="mt-2 text-center text-sm text-muted-foreground">
             가장 밝고 안전한 길로 안내합니다
@@ -89,42 +92,45 @@ function Home() {
         )}
       </section>
 
-      <Dialog open={open} onOpenChange={(o) => (!o ? closeDialog() : null)}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[420px]">
-          {status === "loading" ? (
-            <div className="flex flex-col items-center gap-4 py-6">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <DialogTitle className="text-lg">안전 경로를 탐색 중입니다...</DialogTitle>
-              <DialogDescription>잠시만 기다려 주세요.</DialogDescription>
+          <DialogHeader>
+            <DialogTitle className="text-xl">안심 귀가 경로 안내</DialogTitle>
+            <DialogDescription className="pt-1 text-sm">
+              출발지와 목적지를 확인해 주세요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div>
+              <label className="text-sm font-bold">출발지</label>
+              <input
+                type="text"
+                value={origin}
+                readOnly
+                className="mt-1 w-full rounded-xl border-2 border-border bg-secondary px-4 py-3 text-base text-muted-foreground"
+              />
             </div>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl">매산동 안심 동행길 경로를 찾았습니다</DialogTitle>
-                <DialogDescription className="pt-2 text-base">
-                  가장 밝고 안전한 길로 안내해 드립니다.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-2 space-y-2 rounded-xl bg-secondary p-4">
-                <div className="flex items-center gap-2 text-base">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span className="font-bold">예상 소요 시간 8분</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  셉테드 안심 폴 4기 경유
-                </div>
-              </div>
-              <DialogFooter>
-                <button
-                  onClick={closeDialog}
-                  className="w-full rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
-                >
-                  안내 시작
-                </button>
-              </DialogFooter>
-            </>
-          )}
+            <div>
+              <label className="text-sm font-bold">목적지</label>
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="예: 매산초등학교"
+                className="mt-1 w-full rounded-xl border-2 border-border bg-background px-4 py-3 text-base focus:border-primary focus:outline-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={confirmRoute}
+              disabled={!destination.trim()}
+              className="w-full rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground disabled:opacity-50"
+            >
+              <Navigation className="mr-2 inline h-5 w-5" />
+              경로 안내 시작
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </AppShell>
