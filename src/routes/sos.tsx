@@ -1,6 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Siren, Check, MapPin, Lightbulb, Timer } from "lucide-react";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/sos")({
   head: () => ({ meta: [{ title: "긴급 SOS — 매산동 안심-링크" }] }),
@@ -8,6 +19,9 @@ export const Route = createFileRoute("/sos")({
 });
 
 function SosPage() {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
   return (
     <AppShell>
       <div className="-mb-4 flex items-center gap-3 bg-destructive px-5 py-5 text-destructive-foreground">
@@ -79,11 +93,34 @@ function SosPage() {
 
         <button
           type="button"
+          onClick={() => setOpen(true)}
           className="mt-2 w-full rounded-2xl border-2 border-border bg-card px-6 py-4 text-lg font-bold text-foreground active:scale-[0.99]"
         >
           SOS 취소하기
         </button>
       </section>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent className="max-w-[420px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl">SOS를 취소하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              취소하면 파출소와 자생방범대에 보낸 긴급 알림이 종료됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="flex-1 rounded-xl border-2 px-5 py-3 text-base font-bold">
+              아니오
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => navigate({ to: "/" })}
+              className="flex-1 rounded-xl bg-destructive px-5 py-3 text-base font-bold text-destructive-foreground"
+            >
+              예, 취소합니다
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppShell>
   );
 }
