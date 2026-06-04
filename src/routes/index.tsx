@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Navigation } from "lucide-react";
+import { Navigation, Loader2, MapPin, Clock } from "lucide-react";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { MapView } from "@/components/MapView";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,6 +23,20 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [open, setOpen] = useState(false);
+
+  const startRoute = () => {
+    setStatus("loading");
+    setOpen(true);
+    window.setTimeout(() => setStatus("done"), 1500);
+  };
+
+  const closeDialog = () => {
+    setOpen(false);
+    setStatus("idle");
+  };
+
   return (
     <AppShell>
       <section className="px-4 pt-4">
@@ -43,6 +66,7 @@ function Home() {
       <section className="px-4 pt-5">
         <button
           type="button"
+          onClick={startRoute}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-5 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.99]"
         >
           <Navigation className="h-6 w-6" />
@@ -52,6 +76,45 @@ function Home() {
           가장 밝고 안전한 길로 안내합니다
         </p>
       </section>
+
+      <Dialog open={open} onOpenChange={(o) => (!o ? closeDialog() : null)}>
+        <DialogContent className="max-w-[420px]">
+          {status === "loading" ? (
+            <div className="flex flex-col items-center gap-4 py-6">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <DialogTitle className="text-lg">안전 경로를 탐색 중입니다...</DialogTitle>
+              <DialogDescription>잠시만 기다려 주세요.</DialogDescription>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl">매산동 안심 동행길 경로를 찾았습니다</DialogTitle>
+                <DialogDescription className="pt-2 text-base">
+                  가장 밝고 안전한 길로 안내해 드립니다.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-2 space-y-2 rounded-xl bg-secondary p-4">
+                <div className="flex items-center gap-2 text-base">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <span className="font-bold">예상 소요 시간 8분</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  셉테드 안심 폴 4기 경유
+                </div>
+              </div>
+              <DialogFooter>
+                <button
+                  onClick={closeDialog}
+                  className="w-full rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
+                >
+                  안내 시작
+                </button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
