@@ -174,15 +174,6 @@ function MePage() {
               </div>
             </li>
             <li className="flex gap-3 rounded-xl bg-destructive/10 p-3">
-              <span className="text-2xl">🚨</span>
-              <div>
-                <div className="font-bold text-destructive">SOS 긴급 버튼</div>
-                <div className="text-sm text-muted-foreground">
-                  하단 SOS 탭을 누르면 매산동 파출소와 자생방범대에 즉시 알림이 전송됩니다.
-                </div>
-              </div>
-            </li>
-            <li className="flex gap-3 rounded-xl bg-destructive/10 p-3">
               <span className="text-2xl">🆘</span>
               <div>
                 <div className="font-bold text-destructive">SOS 탭</div>
