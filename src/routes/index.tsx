@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Navigation, Loader2, MapPin, Clock } from "lucide-react";
+import { Navigation } from "lucide-react";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { MapView } from "@/components/MapView";
