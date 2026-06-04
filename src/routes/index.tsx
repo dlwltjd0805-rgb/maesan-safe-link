@@ -23,20 +23,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [open, setOpen] = useState(false);
   const [routeOn, setRouteOn] = useState(false);
+  const [origin] = useState("현재 위치 (수원시 팔달구 매산로 12-3)");
+  const [destination, setDestination] = useState("");
 
   const startRoute = () => {
-    setStatus("loading");
     setOpen(true);
-    window.setTimeout(() => setStatus("done"), 1500);
   };
 
-  const closeDialog = () => {
+  const confirmRoute = () => {
     setOpen(false);
-    if (status === "done") setRouteOn(true);
-    setStatus("idle");
+    setRouteOn(true);
   };
 
   return (
