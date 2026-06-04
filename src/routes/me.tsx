@@ -182,6 +182,24 @@ function MePage() {
                 </div>
               </div>
             </li>
+            <li className="flex gap-3 rounded-xl bg-destructive/10 p-3">
+              <span className="text-2xl">🆘</span>
+              <div>
+                <div className="font-bold text-destructive">SOS 탭</div>
+                <div className="text-sm text-muted-foreground">
+                  매산동 파출소와 자생방범대에 즉시 긴급 경보를 발송합니다.
+                </div>
+              </div>
+            </li>
+            <li className="flex gap-3 rounded-xl bg-[color:var(--senior)]/10 p-3">
+              <span className="text-2xl">👥</span>
+              <div>
+                <div className="font-bold text-[color:var(--senior)]">매핑 탭</div>
+                <div className="text-sm text-muted-foreground">
+                  세대 공존 대리 제보 — 어르신과 청년 봉사단이 함께 만드는 안전 마을.
+                </div>
+              </div>
+            </li>
           </ul>
           <DialogFooter>
             <button
@@ -189,6 +207,44 @@ function MePage() {
               className="w-full rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
             >
               확인
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 닉네임 수정 */}
+      <Dialog open={nameOpen} onOpenChange={setNameOpen}>
+        <DialogContent className="max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">닉네임 수정</DialogTitle>
+            <DialogDescription className="text-base">
+              지도와 제보에 표시될 닉네임을 입력해 주세요.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            placeholder="닉네임"
+            className="text-lg"
+          />
+          <DialogFooter className="gap-2">
+            <button
+              onClick={() => setNameOpen(false)}
+              className="flex-1 rounded-xl border-2 border-border bg-card px-5 py-3 text-base font-bold"
+            >
+              취소
+            </button>
+            <button
+              onClick={() => {
+                const v = nameDraft.trim();
+                if (!v) return;
+                setName(v);
+                setNameOpen(false);
+                toast.success("닉네임이 저장되었습니다.");
+              }}
+              className="flex-1 rounded-xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground"
+            >
+              저장
             </button>
           </DialogFooter>
         </DialogContent>
