@@ -14,18 +14,34 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
+function useLocalStorage<T>(key: string, defaultValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored !== null ? (JSON.parse(stored) as T) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+  const set = (v: T) => {
+    setValue(v);
+    localStorage.setItem(key, JSON.stringify(v));
+  };
+  return [value, set] as const;
+}
+
 export const Route = createFileRoute("/me")({
   head: () => ({ meta: [{ title: "내정보 — 매산동 안심-링크" }] }),
   component: MePage,
 });
 
 function MePage() {
-  const [notify, setNotify] = useState(true);
-  const [emergency, setEmergency] = useState("010-1234-5678");
+  const [notify, setNotify] = useLocalStorage("safelink_notify", true);
+  const [emergency, setEmergency] = useLocalStorage("safelink_emergency", "010-1234-5678");
+  const [name, setName] = useLocalStorage("safelink_name", "김안심");
   const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [draft, setDraft] = useState(emergency);
-  const [name, setName] = useState("김안심");
   const [nameOpen, setNameOpen] = useState(false);
   const [nameDraft, setNameDraft] = useState(name);
 
