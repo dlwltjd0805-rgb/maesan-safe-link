@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HandHeart, Clock, CheckCircle2, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import {
@@ -11,40 +11,36 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { getReports, markDone, subscribe, type UserReport } from "@/lib/reportStore";
 
 export const Route = createFileRoute("/mapping")({
   head: () => ({ meta: [{ title: "세대 공존 대리 매핑 — 매산동 안심-링크" }] }),
   component: MappingPage,
 });
 
-type Report = {
-  title: string;
-  who: string;
-  time: string;
-  location: string;
-  detail: string;
+const emojiMap: Record<string, string> = {
+  "가로등 고장": "💡",
+  "쓰레기 방치": "🗑️",
+  "거동 수상자": "⚠️",
+  "기타 위험": "❓",
+  "CCTV 사각지대": "📷",
+  "보안등 없음": "🔦",
 };
-
-const pending: Report[] = [
-  {
-    title: "💡 매산로 12번 가로등 고장",
-    who: "김OO 어르신",
-    time: "5분 전",
-    location: "수원시 팔달구 매산로 12 (매산시장 옆 골목)",
-    detail: "저녁부터 가로등이 깜빡이다가 꺼져 있어 어둡습니다. 야간 통행이 불안합니다.",
-  },
-  {
-    title: "🗑️ 매산시장 입구 쓰레기 방치",
-    who: "박OO 어르신",
-    time: "18분 전",
-    location: "매산시장 정문 앞 인도",
-    detail: "종량제 봉투가 아닌 일반 쓰레기가 며칠째 쌓여있어 악취가 납니다.",
-  },
-];
 
 function MappingPage() {
   const [requestOpen, setRequestOpen] = useState(false);
-  const [active, setActive] = useState<Report | null>(null);
+  const [active, setActive] = useState<UserReport | null>(null);
+  const [reports, setReports] = useState<UserReport[]>(() => getReports());
+
+  // store 변경 구독
+  useEffect(() => {
+    const unsub = subscribe(() => setReports([...getReports()]));
+    return () => {
+      unsub();
+    };
+  }, []);
+
+  const pending = reports.filter((r) => !r.done);
 
   return (
     <AppShell>
@@ -83,38 +79,47 @@ function MappingPage() {
           </div>
           <h2 className="mt-1 text-xl font-bold">대기 중인 제보</h2>
 
-          <ul className="mt-4 space-y-3">
-            {pending.map((p) => (
-              <li key={p.title}>
-                <button
-                  type="button"
-                  onClick={() => setActive(p)}
-                  className="w-full rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition active:scale-[0.99] active:border-primary"
-                >
-                  <div className="text-base font-bold">{p.title}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">요청: {p.who}</div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" /> {p.time}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
-                      <CheckCircle2 className="h-4 w-4" /> 자세히
-                    </span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    toast.success("매핑 완료! 지도에 반영되었습니다.")
-                  }
-                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-sm active:scale-[0.99]"
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                  현장 방문 후 매핑 완료
-                </button>
-              </li>
-            ))}
-          </ul>
+          {pending.length === 0 ? (
+            <div className="mt-4 rounded-2xl border border-border bg-card p-5 text-center text-sm text-muted-foreground">
+              아직 대기 중인 제보가 없어요 🎉
+            </div>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {pending.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(p)}
+                    className="w-full rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition active:scale-[0.99] active:border-primary"
+                  >
+                    <div className="text-base font-bold">
+                      {emojiMap[p.kind] ?? "📌"} {p.kind}
+                    </div>
+                    <div className="mt-1 text-sm text-muted-foreground">요청: {p.who}</div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" /> {p.time}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
+                        <CheckCircle2 className="h-4 w-4" /> 자세히
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markDone(p.id);
+                      toast.success("매핑 완료! 지도에 반영되었습니다.");
+                    }}
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-base font-bold text-primary-foreground shadow-sm active:scale-[0.99]"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                    현장 방문 후 매핑 완료
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
@@ -144,7 +149,9 @@ function MappingPage() {
           {active && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-xl">{active.title}</DialogTitle>
+                <DialogTitle className="text-xl">
+                  {emojiMap[active.kind] ?? "📌"} {active.kind}
+                </DialogTitle>
                 <DialogDescription className="pt-1 text-sm">
                   요청: {active.who}
                 </DialogDescription>
@@ -164,10 +171,6 @@ function MappingPage() {
                     <div className="text-muted-foreground">{active.time}</div>
                   </div>
                 </div>
-                <div>
-                  <div className="font-bold">내용</div>
-                  <div className="mt-1 text-muted-foreground">{active.detail}</div>
-                </div>
               </div>
               <DialogFooter className="gap-2">
                 <button
@@ -178,6 +181,7 @@ function MappingPage() {
                 </button>
                 <button
                   onClick={() => {
+                    markDone(active.id);
                     setActive(null);
                     toast.success("매핑이 완료되었습니다.", {
                       description: "지도에 반영됩니다.",
