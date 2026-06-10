@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Siren, Check, MapPin, Lightbulb, Timer } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppShell } from "@/components/AppShell";
 import {
   AlertDialog,
@@ -21,9 +21,70 @@ export const Route = createFileRoute("/sos")({
 function SosPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [activated, setActivated] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  return (
-    <AppShell>
+  const startCountdown = () => {
+    setCountdown(3);
+  };
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown === 0) {
+      setActivated(true);
+      setCountdown(null);
+      return;
+    }
+    timerRef.current = setInterval(() => {
+      setCountdown((c) => (c !== null ? c - 1 : null));
+    }, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [countdown]);
+
+  const cancelCountdown = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setCountdown(null);
+  };
+
+  // 카운트다운 중 화면
+  if (countdown !== null) {
+    return (
+      <AppShell>
+        <div className="flex flex-col items-center justify-center px-6 pt-20 text-center">
+          <div className="relative flex h-44 w-44 items-center justify-center rounded-full bg-destructive shadow-2xl shadow-destructive/40">
+            <span className="text-7xl font-black text-white">{countdown}</span>
+            <svg className="absolute inset-0 -rotate-90" viewBox="0 0 176 176">
+              <circle cx="88" cy="88" r="82" fill="none" stroke="white" strokeOpacity="0.2" strokeWidth="8" />
+              <circle
+                cx="88" cy="88" r="82" fill="none" stroke="white" strokeWidth="8"
+                strokeDasharray={2 * Math.PI * 82}
+                strokeDashoffset={2 * Math.PI * 82 * (1 - countdown / 3)}
+                strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset 1s linear" }}
+              />
+            </svg>
+          </div>
+          <p className="mt-8 text-2xl font-bold text-destructive">SOS 발동까지</p>
+          <p className="mt-1 text-base text-muted-foreground">실수라면 아래 버튼을 누르세요</p>
+          <button
+            type="button"
+            onClick={cancelCountdown}
+            className="mt-8 w-full rounded-2xl border-2 border-border bg-card px-6 py-4 text-lg font-bold active:scale-[0.99]"
+          >
+            취소
+          </button>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // SOS 활성화 후 화면
+  if (activated) {
+    return (
+      <AppShell>
       <div className="-mb-4 flex items-center gap-3 bg-destructive px-5 py-5 text-destructive-foreground">
         <span className="relative flex h-10 w-10 items-center justify-center">
           <span className="absolute inset-0 animate-ping rounded-full bg-white/40" />
@@ -124,6 +185,31 @@ function SosPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </AppShell>
+    );
+  }
+
+  // 대기 화면 — SOS 버튼
+  return (
+    <AppShell>
+      <div className="flex flex-col items-center justify-center px-6 pt-16 text-center">
+        <div className="mb-6 rounded-2xl bg-destructive/10 px-4 py-3 text-sm font-bold text-destructive">
+          ⚠️ 긴급 상황에만 사용하세요
+        </div>
+        <button
+          type="button"
+          onClick={startCountdown}
+          className="relative flex h-52 w-52 flex-col items-center justify-center rounded-full bg-destructive shadow-2xl shadow-destructive/40 active:scale-[0.97] transition-transform"
+        >
+          <span className="absolute inset-0 animate-ping rounded-full bg-destructive/30" />
+          <Siren className="relative h-16 w-16 text-white" />
+          <span className="relative mt-3 text-2xl font-black text-white">SOS</span>
+          <span className="relative mt-1 text-sm font-bold text-white/80">눌러서 신고</span>
+        </button>
+        <p className="mt-8 text-base text-muted-foreground">
+          버튼을 누르면 3초 후 매산동 파출소와<br />자생방범대에 긴급 신호가 전송됩니다.
+        </p>
+      </div>
     </AppShell>
   );
 }
