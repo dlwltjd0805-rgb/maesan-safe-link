@@ -11,6 +11,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { addReport, getReports } from "@/lib/reportStore";
 
 export const Route = createFileRoute("/report")({
   head: () => ({ meta: [{ title: "원터치 주민 제보 — 매산동 안심-링크" }] }),
@@ -22,6 +23,8 @@ const items = [
   { emoji: "🗑️", label: "쓰레기 방치" },
   { emoji: "⚠️", label: "거동 수상자" },
   { emoji: "❓", label: "기타 위험" },
+  { emoji: "📷", label: "CCTV 사각지대" },
+  { emoji: "🔦", label: "보안등 없음" },
 ];
 
 function ReportPage() {
@@ -30,15 +33,26 @@ function ReportPage() {
 
   const handleSelect = (label: string) => {
     setSelected(label);
-    toast.success("제보가 접수되었습니다.", {
-      description: `${label} · 지도에 반영됩니다.`,
-    });
   };
 
   const handleLocation = () => {
+    if (!selected) {
+      toast.error("제보 유형을 먼저 선택해 주세요.");
+      return;
+    }
+    const who = (() => {
+      try {
+        const stored = localStorage.getItem("safelink_name");
+        return stored ? (JSON.parse(stored) as string) : "익명 주민";
+      } catch {
+        return "익명 주민";
+      }
+    })();
+    addReport(selected as Parameters<typeof addReport>[0], who);
     toast.success("제보가 완료되었습니다.", {
-      description: "현재 위치: 수원시 팔달구 매산로 12-3",
+      description: `${selected} · 매핑 탭에 반영됩니다.`,
     });
+    setSelected(null);
   };
 
   return (
@@ -86,9 +100,11 @@ function ReportPage() {
         <button
           type="button"
           onClick={handleLocation}
-          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-5 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.99]"
+          disabled={!selected}
+          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-5 text-xl font-bold text-primary-foreground shadow-lg shadow-primary/30 active:scale-[0.99] disabled:opacity-40 disabled:shadow-none"
         >
-          <MapPin className="h-6 w-6" /> 현재 위치로 제보하기
+          <MapPin className="h-6 w-6" />
+          {selected ? `'${selected}' 제보하기` : "유형을 먼저 선택하세요"}
         </button>
       </section>
 
