@@ -34,7 +34,10 @@ function MappingPage() {
 
   // store 변경 구독
   useEffect(() => {
-    return subscribe(() => setReports([...getReports()]));
+    const unsub = subscribe(() => setReports([...getReports()]));
+    return () => {
+      unsub();
+    };
   }, []);
 
   const pending = reports.filter((r) => !r.done);
