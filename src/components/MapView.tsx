@@ -63,14 +63,13 @@ export function MapView({ showRoute = false }: { showRoute?: boolean }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl border border-border bg-secondary shadow-sm">
-      {/* 구글맵 — pointer-events-none 으로 완전히 고정 (드래그/줌 차단) */}
+      {/* 구글맵 — 드래그/줌 가능 */}
       <iframe
         title="매산동 실시간 안심 지도"
         src={mapSrc}
         loading="lazy"
-        className="pointer-events-none absolute inset-0 h-full w-full border-0 select-none"
+        className="absolute inset-0 h-full w-full border-0"
         referrerPolicy="no-referrer-when-downgrade"
-        tabIndex={-1}
       />
 
       {/* 경로 (민트 점선) */}
@@ -93,8 +92,8 @@ export function MapView({ showRoute = false }: { showRoute?: boolean }) {
         </svg>
       )}
 
-      {/* 핀 (지도 위 고정 — 화면 % 기준이므로 같이 움직이지 않음) */}
-      <div className="absolute inset-0">
+      {/* 핀 레이어 — pointer-events-none으로 지도 터치 통과, 핀 버튼만 pointer-events-auto */}
+      <div className="pointer-events-none absolute inset-0">
         {pins.map((p) => {
           const isSafe = p.kind === "safe";
           return (
@@ -102,7 +101,7 @@ export function MapView({ showRoute = false }: { showRoute?: boolean }) {
               key={p.id}
               type="button"
               onClick={() => setActive(p)}
-              className="absolute -translate-x-1/2 -translate-y-full focus:outline-none"
+              className="pointer-events-auto absolute -translate-x-1/2 -translate-y-full focus:outline-none"
               style={{ left: `${p.left}%`, top: `${p.top}%` }}
               aria-label={p.title}
             >
